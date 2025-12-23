@@ -180,14 +180,34 @@ try:
         import colorsys
 
         # Fonction utilitaire pour ajuster la luminosité (Pure Python sans matplotlib)
-        def adjust_lightness(hex_color, amount=0.5):
-            hex_color = hex_color.lstrip('#')
-            rgb = tuple(int(hex_color[i:i+2], 16) / 255.0 for i in (0, 2, 4))
-            h, l, s = colorsys.rgb_to_hls(*rgb)
+        # Fonction utilitaire pour ajuster la luminosité (Pure Python sans matplotlib)
+        def adjust_lightness(color_str, amount=0.5):
+            # Gestion format rgb(r, g, b) ou rgba(r, g, b, a)
+            if color_str.startswith('rgb'):
+                import re
+                try:
+                    # Extraction simple des chiffres
+                    nums = [float(n) for n in re.findall(r'\d*\.?\d+', color_str)]
+                    if len(nums) >= 3:
+                        r, g, b = nums[0]/255.0, nums[1]/255.0, nums[2]/255.0
+                    else:
+                        return color_str # Fallback
+                except:
+                    return color_str
+            else:
+                # Gestion Hex
+                hex_color = color_str.lstrip('#')
+                try:
+                    rgb = tuple(int(hex_color[i:i+2], 16) / 255.0 for i in (0, 2, 4))
+                    r, g, b = rgb
+                except:
+                    return color_str # Retourne tel quel si erreur
+
+            h, l, s = colorsys.rgb_to_hls(r, g, b)
             # On modifie la luminosité
             l = max(0, min(1, amount * l))
-            r, g, b = colorsys.hls_to_rgb(h, l, s)
-            return '#{:02x}{:02x}{:02x}'.format(int(r*255), int(g*255), int(b*255))
+            r_new, g_new, b_new = colorsys.hls_to_rgb(h, l, s)
+            return '#{:02x}{:02x}{:02x}'.format(int(r_new*255), int(g_new*255), int(b_new*255))
 
         # Palette de base 
         palette = px.colors.qualitative.Bold
