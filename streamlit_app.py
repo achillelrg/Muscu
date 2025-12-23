@@ -7,6 +7,7 @@ except ImportError:
     pass
 
 # --- Configuration ---
+# Force reload
 st.set_page_config(page_title="Sport Analytics 3D", layout="wide")
 
 try:
