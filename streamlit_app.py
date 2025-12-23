@@ -22,8 +22,19 @@ def get_data():
     
     # Remplace par le NOM exact de ton fichier Google Sheets
     sheet = client.open("MUSCU").worksheet("DATA")
-    data = sheet.get_all_records()
-    return pd.DataFrame(data)
+    
+    # 2. Récupère uniquement les colonnes A à F (pour éviter les colonnes vides à droite)
+    # head=2 car tes titres (Date, Exercice...) sont sur la ligne 2
+    data = sheet.get_all_records(head=2, default_blank=None)
+    
+    # 3. On transforme en DataFrame
+    df = pd.DataFrame(data)
+    
+    # 4. On s'assure de ne garder que les colonnes qui ont un nom
+    df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+    # On filtre les lignes où l'exercice est vide (au cas où il y aurait des résidus)
+    df = df[df['Exercice'] != ""]
+    return df
 
 try:
     df = get_data()
