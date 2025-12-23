@@ -93,7 +93,8 @@ try:
             mode='lines+markers',
             name='Progression Globale',
             line=dict(color='#ff7f0e', width=6),
-            marker=dict(size=5, color=df_plot['Poids'], colorscale='Viridis', showscale=True, colorbar=dict(title="Poids"))
+            marker=dict(size=5, color=df_plot['Poids'], colorscale='Viridis', showscale=True, colorbar=dict(title="Poids")),
+            hovertemplate="<b>Date</b>: %{x|%d/%m/%Y}<br><b>Reps</b>: %{y}<br><b>Poids</b>: %{z} kg<extra></extra>"
         ))
     else:
         # Comportement par défaut : traces par série
@@ -106,7 +107,8 @@ try:
                 mode='lines+markers',
                 name=f'Série {s}',
                 line=dict(color=colors[i % len(colors)], width=4),
-                marker=dict(size=4)
+                marker=dict(size=4),
+                hovertemplate="<b>Date</b>: %{x|%d/%m/%Y}<br><b>Reps</b>: %{y}<br><b>Poids</b>: %{z} kg<extra></extra>"
             ))
 
     # Mise à jour du layout et de la caméra
