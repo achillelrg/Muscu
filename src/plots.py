@@ -61,7 +61,8 @@ def create_3d_plot_global(df_glob, exercices_sel):
             subset_serie = subset_exo[subset_exo['Série'] == ser]
             
             # Use utility for lightness
-            lightness_factor = 0.8 + (idx_ser * 0.15) 
+            # Start darker (0.6) and go much lighter (+0.3 per series) for visibility
+            lightness_factor = 1.2 - (idx_ser * 0.3) 
             final_color = adjust_lightness(base_color, lightness_factor)
             
             fig.add_trace(go.Scatter3d(
