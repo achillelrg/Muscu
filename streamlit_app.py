@@ -170,29 +170,55 @@ try:
         exos_filtered = sorted(df[df['Muscle'].isin(muscles_sel)]['Exercice'].unique())
         exercices_sel = st.sidebar.multiselect("Exercices", exos_filtered, default=exos_filtered[:3] if len(exos_filtered)>3 else exos_filtered)
         
-        df_glob = df[df['Exercice'].isin(exercices_sel)].sort_values('Date')
+        df_glob = df[df['Exercice'].isin(exercices_sel)].sort_values(['Date', 'Série'])
         
         st.title("🌍 Comparaison Multi-Exercices")
         
         fig = go.Figure()
         
-        # Palette de couleurs discrète pour distinguir les exercices
         import plotly.express as px
+        import colorsys
+
+        # Fonction utilitaire pour ajuster la luminosité (Pure Python sans matplotlib)
+        def adjust_lightness(hex_color, amount=0.5):
+            hex_color = hex_color.lstrip('#')
+            rgb = tuple(int(hex_color[i:i+2], 16) / 255.0 for i in (0, 2, 4))
+            h, l, s = colorsys.rgb_to_hls(*rgb)
+            # On modifie la luminosité
+            l = max(0, min(1, amount * l))
+            r, g, b = colorsys.hls_to_rgb(h, l, s)
+            return '#{:02x}{:02x}{:02x}'.format(int(r*255), int(g*255), int(b*255))
+
+        # Palette de base 
         palette = px.colors.qualitative.Bold
         
-        for idx, exo in enumerate(exercices_sel):
-            subset = df_glob[df_glob['Exercice'] == exo]
-            color = palette[idx % len(palette)]
+        for idx_exo, exo in enumerate(exercices_sel):
+            subset_exo = df_glob[df_glob['Exercice'] == exo]
+            base_color = palette[idx_exo % len(palette)]
             
-            fig.add_trace(go.Scatter3d(
-                x=subset['Date'],
-                y=subset['Reps'],
-                z=subset['Poids'],
-                mode='markers', # Juste markers pour éviter le chaos des lignes
-                name=exo,
-                marker=dict(size=5, color=color),
-                hovertemplate=f"<b>{exo}</b><br>Date: %{{x|%d/%m/%Y}}<br>Reps: %{{y}}<br>Poids: %{{z}} kg<extra></extra>"
-            ))
+            # Boucle sur les séries pour cet exercice
+            series = sorted(subset_exo['Série'].unique())
+            for idx_ser, ser in enumerate(series):
+                subset_serie = subset_exo[subset_exo['Série'] == ser]
+                
+                # Variation de couleur : plus la série est élevée, plus c'est clair (ou sombre)
+                # On multiplie la luminosité par un facteur (1.0 = base, 1.2 = plus clair, etc.)
+                # On commence à 0.8 (un peu sombre) et on monte
+                lightness_factor = 0.8 + (idx_ser * 0.15) 
+                final_color = adjust_lightness(base_color, lightness_factor)
+                
+                fig.add_trace(go.Scatter3d(
+                    x=subset_serie['Date'],
+                    y=subset_serie['Reps'],
+                    z=subset_serie['Poids'],
+                    mode='lines+markers', 
+                    name=f"{exo} - S{ser}",
+                    line=dict(color=final_color, width=4),
+                    marker=dict(size=4, color=final_color),
+                    legendgroup=exo, # Groupe dans la légende pour clarté
+                    legendgrouptitle_text=exo,
+                    hovertemplate=f"<b>{exo} S{ser}</b><br>Date: %{{x|%d/%m/%Y}}<br>Reps: %{{y}}<br>Poids: %{{z}} kg<extra></extra>"
+                ))
             
         fig.update_layout(
             scene=dict(
@@ -203,7 +229,11 @@ try:
             ),
             margin=dict(l=0, r=0, b=0, t=0), height=800,
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01, bgcolor="rgba(0,0,0,0)", font=dict(color="white"))
+            legend=dict(
+                yanchor="top", y=0.99, xanchor="left", x=0.01, 
+                bgcolor="rgba(0,0,0,0)", font=dict(color="white"),
+                groupclick="toggleitem" # Permet de cliquer sur le titre du groupe pour tout masquer
+            )
         )
         st.plotly_chart(fig, use_container_width=True)
 
