@@ -9,13 +9,19 @@ st.set_page_config(page_title="Sport Analytics 3D", layout="wide")
 
 # Connexion via les secrets de Streamlit
 def get_data():
-    scope = ["https://www.googleapis.com/auth/spreadsheets"]
+    scope = [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ]
     # On récupère les credentials depuis les secrets de Streamlit
-    creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"])
+    creds = Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"], 
+        scopes=scope
+    )
     client = gspread.authorize(creds)
     
     # Remplace par le NOM exact de ton fichier Google Sheets
-    sheet = client.open("TON_NOM_DE_FICHIER").worksheet("DATA")
+    sheet = client.open("MUSCU").worksheet("DATA")
     data = sheet.get_all_records()
     return pd.DataFrame(data)
 
