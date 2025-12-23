@@ -115,14 +115,28 @@ try:
             xaxis_title='Date 📅',
             yaxis_title='Reps 🔄',
             zaxis_title='Poids (kg) 🏋️',
-            xaxis=dict(backgroundcolor="rgba(0,0,0,0)", gridcolor="gray", showbackground=True),
+            xaxis=dict(
+                backgroundcolor="rgba(0,0,0,0)", 
+                gridcolor="gray", 
+                showbackground=True,
+                tickformat='%d/%m\n%y', # Format date court sur 2 lignes
+                nticks=6
+            ),
             yaxis=dict(backgroundcolor="rgba(0,0,0,0)", gridcolor="gray", showbackground=True),
             zaxis=dict(backgroundcolor="rgba(0,0,0,0)", gridcolor="gray", showbackground=True),
         ),
         margin=dict(l=0, r=0, b=0, t=0),
         height=700,
         paper_bgcolor="rgba(0,0,0,0)", # Fond transparent pour s'intégrer au thème
-        plot_bgcolor="rgba(0,0,0,0)"
+        plot_bgcolor="rgba(0,0,0,0)",
+        legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="left",
+            x=0.01,
+            bgcolor="rgba(0,0,0,0)",
+            font=dict(size=12, color="white")
+        )
     )
 
     # Appliquer la caméra si une vue spécifique est sélectionnée
